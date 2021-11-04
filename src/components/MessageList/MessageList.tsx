@@ -15,6 +15,22 @@ export function MessageList() {
   >([])
 
   useEffect(() => {
+    function handleMessageCreated(message: ContractMessage) {
+      setMessages([messageTransformer(message), ...messages])
+    }
+
+    if (isEthereumLoaded) {
+      contract?.on('MessageCreated', handleMessageCreated)
+    }
+
+    return () => {
+      if (isEthereumLoaded) {
+        contract?.removeListener('MessageCreated', handleMessageCreated)
+      }
+    }
+  }, [contract, isEthereumLoaded, messages])
+
+  useEffect(() => {
     async function loadMessages() {
       const messages = await contract?.getMessages()
 
