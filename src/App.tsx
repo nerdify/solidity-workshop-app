@@ -8,7 +8,7 @@ export function App() {
   return (
     <ChakraProvider theme={theme}>
       <Web3Provider>
-        <Container paddingBlock="4">
+        <Container paddingBlockEnd="8" paddingBlockStart="4">
           <Stack spacing="4">
             <Header />
             <MessageForm />

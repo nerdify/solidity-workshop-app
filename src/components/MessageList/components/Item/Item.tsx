@@ -1,6 +1,6 @@
-import {Box, HStack, Spacer} from '@chakra-ui/react'
+import {Box, HStack, Text, Spacer, Stack} from '@chakra-ui/react'
 
-import {ReactionPopover} from './components'
+import {ReactionPopover, ReactionSummary} from './components'
 
 interface ItemProps {
   message: {
@@ -12,7 +12,12 @@ interface ItemProps {
 
 export function Item({message}: ItemProps) {
   return (
-    <Box bgColor="white" borderRadius="base" boxShadow="base">
+    <Box
+      bgColor="white"
+      borderRadius="base"
+      boxShadow="base"
+      position="relative"
+    >
       <HStack
         borderBottom="1px solid"
         borderBottomColor="gray.100"
@@ -31,9 +36,10 @@ export function Item({message}: ItemProps) {
         <Spacer />
         <ReactionPopover />
       </HStack>
-      <Box fontSize="sm" padding="4">
-        {message.text}
-      </Box>
+      <Stack padding="4" spacing="4">
+        <Text fontSize="sm">{message.text}</Text>
+        {/* <ReactionSummary /> */}
+      </Stack>
     </Box>
   )
 }

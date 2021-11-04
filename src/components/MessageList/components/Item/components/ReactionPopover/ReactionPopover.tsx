@@ -8,60 +8,9 @@ import {
   PopoverTrigger,
 } from '@chakra-ui/react'
 import {faFaceSmile as falFaceSmile} from '@fortawesome/pro-light-svg-icons'
-import {
-  faEyes as fadEyes,
-  faFaceConfused as fadFaceConfused,
-  faFaceSmile as fadFaceSmile,
-  faHeart as fadHeart,
-  faPartyHorn as fadPartyHorn,
-  faRocketLaunch as fadRocketLaunch,
-  faThumbsDown as fadThumbsDown,
-  faThumbsUp as fadThumbsUp,
-} from '@fortawesome/pro-duotone-svg-icons'
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome'
 
-const REACTION_ICONS = [
-  {
-    icon: fadThumbsUp,
-    label: `thumbs up`,
-    name: 'thumbs-up',
-  },
-  {
-    icon: fadThumbsDown,
-    label: `thumbs down`,
-    name: 'thumbs-down',
-  },
-  {
-    icon: fadFaceSmile,
-    label: `laugh`,
-    name: 'face-smile',
-  },
-  {
-    icon: fadPartyHorn,
-    label: `hooray`,
-    name: 'party-horn',
-  },
-  {
-    icon: fadFaceConfused,
-    label: `confused`,
-    name: 'face-confused',
-  },
-  {
-    icon: fadHeart,
-    label: `heart`,
-    name: 'heart',
-  },
-  {
-    icon: fadRocketLaunch,
-    label: `rocket`,
-    name: 'rocket-launch',
-  },
-  {
-    icon: fadEyes,
-    label: `eyes`,
-    name: 'eyes',
-  },
-]
+import {REACTION_ICONS} from 'components/MessageList/constants'
 
 export function ReactionPopover() {
   return (
@@ -81,12 +30,12 @@ export function ReactionPopover() {
         <PopoverArrow />
         <PopoverBody paddingInline="2">
           <SimpleGrid columns={4}>
-            {REACTION_ICONS.map((icon) => (
+            {Object.entries(REACTION_ICONS).map(([name, {icon, label}]) => (
               <Box
                 as="button"
-                aria-label={`React with ${icon.label} emoji`}
+                aria-label={`React with ${label} emoji`}
                 boxSize="8"
-                key={icon.name}
+                key={name}
                 _hover={{
                   '& > svg': {
                     transform: 'scale(1.25)',
@@ -96,7 +45,7 @@ export function ReactionPopover() {
                 <Box
                   as={FontAwesomeIcon}
                   fixedWidth
-                  icon={icon.icon}
+                  icon={icon}
                   transition="transform 0.15s"
                 />
               </Box>
