@@ -1,32 +1,49 @@
-import {FastField, Form, Formik, FormikHelpers} from 'formik'
-import {useState} from 'react'
+import {FastField, Form, Formik} from 'formik'
+import type {FormikHelpers, FormikProps} from 'formik'
+import {useRef} from 'react'
 import ReactTextareaAutosize from 'react-textarea-autosize'
 
 import {Button, Stack, Textarea} from '@chakra-ui/react'
+import {asLayoutEffect, useMachine} from '@xstate/react'
 
 import {useWeb3} from 'context/Web3Provider'
+
+import {createMessageMachine} from './createMessageMachine'
 
 interface Values {
   message: string
 }
 
 export function MessageForm() {
-  const [isWaitingForConfirmation, setIsWaitingForConfirmation] =
-    useState(false)
-  const [isWaitingForTransaction, setIsWaitingForTransaction] = useState(false)
+  const formikRef = useRef<FormikProps<Values>>(null)
+  const textareaRef = useRef<HTMLTextAreaElement>(null)
   const {contract, isWalletConnected} = useWeb3()
-
-  const loadingText = isWaitingForConfirmation
-    ? 'Waiting for confirmation'
-    : isWaitingForTransaction
-    ? 'Waiting transaction to be mined'
-    : ''
+  const [createMessageState, sendToCreateMachine] = useMachine(
+    createMessageMachine,
+    {
+      actions: {
+        resetForm: asLayoutEffect(() => {
+          formikRef.current?.resetForm()
+          textareaRef.current?.focus()
+        }),
+      },
+      services: {
+        confirmTransaction: (ctx, event) => {
+          return contract?.['createMessage(string)'](event.values.message)
+        },
+        confirmMined: (ctx, event) => {
+          return event.data.wait()
+        },
+      },
+    }
+  )
 
   return (
     <Formik
       initialValues={{
         message: '',
       }}
+      innerRef={formikRef}
       onSubmit={handleSubmit}
     >
       <Stack
@@ -45,18 +62,25 @@ export function MessageForm() {
               autoFocus
               disabled={
                 !isWalletConnected ||
-                isWaitingForConfirmation ||
-                isWaitingForTransaction
+                createMessageState.matches('waitingForConfirmation') ||
+                createMessageState.matches('waitingForTransaction')
               }
               placeholder="Type a message..."
+              ref={textareaRef}
             />
           )}
         </FastField>
         <Button
           colorScheme="blue"
           disabled={!isWalletConnected}
-          isLoading={isWaitingForConfirmation || isWaitingForTransaction}
-          loadingText={loadingText}
+          isLoading={
+            createMessageState.matches('waitingForConfirmation') ||
+            createMessageState.matches('waitingForTransaction')
+          }
+          loadingText={
+            createMessageState.meta[`createMessage.${createMessageState.value}`]
+              ?.loadingText
+          }
           type="submit"
         >
           Send Message
@@ -69,19 +93,9 @@ export function MessageForm() {
     values: Values,
     formikBag: FormikHelpers<Values>
   ) {
-    setIsWaitingForConfirmation(true)
-
-    const txn = await contract?.['createMessage(string,string)'](
-      values.message,
-      'hosmelq'
-    )
-
-    setIsWaitingForConfirmation(false)
-    setIsWaitingForTransaction(true)
-
-    await txn.wait()
-
-    formikBag.resetForm()
-    setIsWaitingForTransaction(false)
+    sendToCreateMachine({
+      type: `SUBMIT`,
+      values,
+    })
   }
 }
