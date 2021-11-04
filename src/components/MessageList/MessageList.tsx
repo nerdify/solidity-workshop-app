@@ -1,74 +1,67 @@
-import {ethers} from 'ethers'
-import {FastField, Form, Formik, FormikHelpers} from 'formik'
+import {useEffect, useState} from 'react'
 
-import {Button, Stack, Textarea} from '@chakra-ui/react'
+import {Box, Center, HStack, Spacer, Spinner, Stack} from '@chakra-ui/react'
 
-import ChatJSON from 'Chat.json'
+import {useWeb3} from 'context/Web3Provider'
+import {messageTransformer} from 'utilities/web3/transformers'
 
-interface MessageListProps {
-  isWalletConnected: boolean
-}
+import {ReactionPopover} from './components'
 
-interface Values {
-  message: string
-}
+export function MessageList() {
+  const {contract, isEthereumLoaded} = useWeb3()
+  const [isLoading, setIsLoading] = useState(isEthereumLoaded)
+  const [messages, setMessages] = useState<
+    ReturnType<typeof messageTransformer>[]
+  >([])
 
-export function MessageList({isWalletConnected}: MessageListProps) {
-  return (
-    <Formik
-      initialValues={{
-        message: '',
-      }}
-      onSubmit={handleSubmit}
-    >
-      <Stack
-        as={Form}
-        bgColor="white"
-        borderRadius="base"
-        boxShadow="base"
-        padding="4"
-        spacing="4"
-      >
-        <FastField name="message">
-          {({field}) => (
-            <Textarea
-              {...field}
-              disabled={!isWalletConnected}
-              placeholder="Type a message..."
-            />
-          )}
-        </FastField>
-        <Button colorScheme="blue" disabled={!isWalletConnected} type="submit">
-          Send Message
-        </Button>
-      </Stack>
-    </Formik>
-  )
+  useEffect(() => {
+    async function loadMessages() {
+      const messages = await contract?.getMessages()
 
-  async function handleSubmit(
-    values: Values,
-    formikBag: FormikHelpers<Values>
-  ) {
-    console.log(`values: `, values)
-    // @ts-expect-error
-    const provider = new ethers.providers.Web3Provider(window.ethereum)
-    const signer = provider.getSigner()
-    const contract = new ethers.Contract(
-      process.env.REACT_APP_CONTRACT_ADDRESS as string,
-      ChatJSON.abi,
-      signer
+      setMessages(messages.map(messageTransformer))
+      setIsLoading(false)
+    }
+
+    if (isEthereumLoaded) {
+      loadMessages()
+    }
+  }, [contract, isEthereumLoaded])
+
+  if (isLoading) {
+    return (
+      <Center>
+        <Spinner />
+      </Center>
     )
-
-    const txn = await contract['createMessage(string,string)'](
-      values.message,
-      'hosmelq'
-    )
-
-    await txn.wait()
-
-    const messages = await contract.getMessages()
-    console.log(`messages: `, messages)
-
-    formikBag.resetForm()
   }
+
+  return (
+    <Stack spacing="4">
+      {messages.map((message, index) => (
+        <Box bgColor="white" borderRadius="base" boxShadow="base" key={index}>
+          <HStack
+            borderBottom="1px solid"
+            borderBottomColor="gray.100"
+            fontSize="sm"
+            fontWeight="semibold"
+            paddingBlock="2"
+            paddingInline="4"
+          >
+            {message.username && (
+              <>
+                <Box>{message.username}</Box>
+                <Box>•</Box>
+              </>
+            )}
+            <Box isTruncated>{message.sender}</Box>
+            <Spacer />
+            <ReactionPopover />
+          </HStack>
+          <Box fontSize="sm" padding="4">
+            {message.text}
+          </Box>
+        </Box>
+      ))}
+    </Stack>
+  )
 }

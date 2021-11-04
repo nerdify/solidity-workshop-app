@@ -17,5 +17,6 @@
     "strict": true,
     "target": "es5"
   },
+  "files": ["contract-types.d.ts"],
   "include": ["src"]
 }
