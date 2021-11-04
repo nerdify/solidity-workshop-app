@@ -1,6 +1,9 @@
 import {Box, HStack, Text, Spacer, Stack} from '@chakra-ui/react'
 
-import {ReactionPopover, ReactionSummary} from './components'
+import {
+  ReactionPopover,
+  // ReactionSummary
+} from './components'
 
 interface ItemProps {
   message: {
