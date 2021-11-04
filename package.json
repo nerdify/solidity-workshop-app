@@ -27,6 +27,7 @@
     "react-dom": "18.0.0-alpha-255221c86-20211103",
     "react-router-dom": "6.0.0",
     "react-scripts": "4.0.3",
+    "react-textarea-autosize": "8.3.3",
     "web-vitals": "2.1.2",
     "yup": "1.0.0-alpha.2"
   },

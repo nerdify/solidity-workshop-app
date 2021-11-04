@@ -37,7 +37,9 @@ export function Item({message}: ItemProps) {
         <ReactionPopover />
       </HStack>
       <Stack padding="4" spacing="4">
-        <Text fontSize="sm">{message.text}</Text>
+        <Text fontSize="sm" whiteSpace="pre-line">
+          {message.text}
+        </Text>
         {/* <ReactionSummary /> */}
       </Stack>
     </Box>

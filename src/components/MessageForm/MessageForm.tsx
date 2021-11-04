@@ -1,5 +1,6 @@
 import {FastField, Form, Formik, FormikHelpers} from 'formik'
 import {useState} from 'react'
+import ReactTextareaAutosize from 'react-textarea-autosize'
 
 import {Button, Stack, Textarea} from '@chakra-ui/react'
 
@@ -40,7 +41,13 @@ export function MessageForm() {
           {({field}) => (
             <Textarea
               {...field}
-              disabled={!isWalletConnected}
+              as={ReactTextareaAutosize}
+              autoFocus
+              disabled={
+                !isWalletConnected ||
+                isWaitingForConfirmation ||
+                isWaitingForTransaction
+              }
               placeholder="Type a message..."
             />
           )}

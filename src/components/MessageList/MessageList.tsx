@@ -18,7 +18,7 @@ export function MessageList() {
     async function loadMessages() {
       const messages = await contract?.getMessages()
 
-      setMessages(messages.map(messageTransformer))
+      setMessages([...messages.map(messageTransformer).reverse()])
       setIsLoading(false)
     }
 
